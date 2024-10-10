@@ -26,10 +26,10 @@
                 <a href="{{ route('acc.myjob') }}">My Jobs</a>
             </li>
             <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                <a href="job-applied.html">Jobs Applied</a>
+                <a href="{{ route('acc.myapplyjob') }}">Jobs Applied</a>
             </li>
             <li class="list-group-item d-flex justify-content-between align-items-center p-3">
-                <a href="saved-jobs.html">Saved Jobs</a>
+                <a href="{{ route('acc.getsavejob') }}">Saved Jobs</a>
             </li>     
             <li class="list-group-item d-flex justify-content-between align-items-center p-3">
                 <a href="{{ route('acc.logout') }}">Logout</a>

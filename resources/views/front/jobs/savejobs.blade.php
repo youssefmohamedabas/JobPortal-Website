@@ -51,16 +51,16 @@
                                 </thead>
                                 <tbody class="border-0">
                                     @if($jobs->isNotEmpty())
-                                    @foreach ($jobs as $job )
+                                    @foreach ($jobs as $jobe )
                                     <tr class="active">
                                         <td>
-                                            <div class="job-name fw-500">{{ $job->title }}</div>
-                                            <div class="info1">{{ $job->jobType->name }}.{{ $job->location }}</div>
+                                            <div class="job-name fw-500">{{ $jobe->job->title }}</div>
+                                            <div class="info1">{{ $jobe->job->jobType->name }}.{{ $jobe->job->location }}</div>
                                         </td>
-                                        <td>{{ \Carbon\Carbon::parse($job->created_at)->format('d M, Y') }}</td>
-                                        <td>130 Applications</td>
+                                        <td>{{ \Carbon\Carbon::parse($jobe->created_at)->format('d M, Y') }}</td>
+                                        <td>{{ $jobe->job->applications->count() }} Application </td>
                                         <td>
-                                            @if ($job->status ==1)
+                                            @if ($jobe->job->status ==1)
                                             <div class="job-status text-capitalize">active</div>
                                             @else
                                             <div class="job-status text-capitalize">Block</div>
@@ -73,9 +73,9 @@
                                                     <i class="fa fa-ellipsis-v" aria-hidden="true"></i>
                                                 </button>
                                                 <ul class="dropdown-menu dropdown-menu-end">
-                                                    <li><a class="dropdown-item" href="{{ route('mygetjob', $job->id ) }}"> <i class="fa fa-eye" aria-hidden="true"></i> View</a></li>
-                                                    <li><a class="dropdown-item" href={{route('acc.editjob',$job->id) }}"><i class="fa fa-edit" aria-hidden="true"></i> Edit</a></li>
-                                                    <li><a class="dropdown-item" onclick="deleteJob({{ $job->id }})"><i class="fa fa-trash" aria-hidden="true"></i> Delete</a></li>
+                                                    <li><a class="dropdown-item" href="{{ route('getjob', $jobe->job->id ) }}"> <i class="fa fa-eye" aria-hidden="true"></i> View</a></li>
+                                                    
+                                                    <li><a class="dropdown-item" onclick="deleteJob({{ $jobe->job->id }})"><i class="fa fa-trash" aria-hidden="true"></i> Remove</a></li>
                                                 </ul>
                                             </div>
                                         </td>
@@ -112,7 +112,7 @@
             if (result.isConfirmed) {
                 // Make the delete request
                 $.ajax({
-                    url: "{{ route('acc.deletejob') }}",
+                    url: "{{ route('acc.removesavejob') }}",
                     type: 'post',
                     data: {
                         _token: '{{ csrf_token() }}',
