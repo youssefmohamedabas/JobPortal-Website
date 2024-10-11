@@ -65,6 +65,7 @@ Route::group(['prefix' => 'account'], function () {
         Route::get('/jobssave/forme/{id}',[JobController::class,'setsavejob'])->name('getsavejob');
         Route::get('/getjobssave/forme/',[JobController::class,'getsavejob'])->name('acc.getsavejob');
         Route::post('/removejobssave/forme/',[JobController::class,'removesavejob'])->name('acc.removesavejob');
-
+        
+Route::get('/search/job/3awatly/',[Jobcontroller::class,'searchjob'])->name('searchjob');
     });
 });

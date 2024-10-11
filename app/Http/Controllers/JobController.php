@@ -7,14 +7,13 @@ use App\Models\Category;
 use App\Mail\jobnotificationmail;
 use App\Models\jobapplication;
 use App\Models\Savejob;
-
-
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Models\Job;
 use App\Models\JobType;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 use function Laravel\Prompts\error;
@@ -24,7 +23,7 @@ class JobController extends Controller
     $categories=Category::where('status',1)->get();
     $jobtypes=JobType::where('status',1)->get();
     $jobs=Job::where('status',1)->orderBy('created_at','DESC')->with('jobType')->paginate(9);
-return view('front.jobs.jobs',['categories'=>$categories,'jobtypes'=>$jobtypes,'jobs'=>$jobs]);
+return view('front.jobs.jobs',['categories'=>$categories,'jobtypes'=>$jobtypes,'jobs'=>$jobs,'req'=>null]);
     
 }
     public function index(){
@@ -286,4 +285,58 @@ public function removesavejob(Request $req){
       return response()-> json(['status'=>false]);
   
   }
+  public function searchjob(Request $req) {
+    // Initialize the query builder for the Job model
+    $query = Job::query();
+
+    // Check if the category is provided, then add to query
+    if ($req->has('category') && !empty($req->category)) {
+        $query->where('category_id', $req->category);
+    }
+
+    // Check if the keywords are provided, then add to query
+    if ($req->has('keywords') && !empty($req->keywords)) {
+        $query->where(function($q) use ($req) {
+            $q->where('keywords', 'LIKE', '%' . $req->keywords . '%')
+              ->orWhere('title', 'LIKE', '%' . $req->keywords . '%');
+        });
+    }
+
+    // Check if the location is provided, then add to query
+    if ($req->has('location') && !empty($req->location)) {
+        $query->where('location', 'LIKE', '%' . $req->location . '%');
+    }
+
+    // Check if the job type is provided, then add to query
+    if ($req->has('job_types') && !empty($req->job_types)) {
+        // Debugging: Log the selected job types
+        
+        $query->whereIn('job_type_id', $req->job_types);
+    }
+
+    // Check if the experience is provided, then add to query
+    if ($req->has('experience') && !empty($req->experience)) {
+        // Assuming 'experience' is stored as years in the database
+        if ($req->experience == 11) {
+            $query->where('experience', '>', 10);
+        } else {
+            $query->where('experience', '=', $req->experience);
+        }
+    }
+
+    // Execute the query and get the results
+    $jobs = $query->with('jobType')->get();
+    $categories = Category::where('status', 1)->get();
+    $jobtypes = JobType::where('status', 1)->get();
+
+    // Return the view with the jobs result
+    return view('front.jobs.jobs', [
+        'categories' => $categories,
+        'jobtypes' => $jobtypes,
+        'jobs' => $jobs,
+        'req' => $req
+    ]);
+}
+
+
 }

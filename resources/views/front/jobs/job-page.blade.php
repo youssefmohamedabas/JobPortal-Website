@@ -52,9 +52,15 @@
                             </div>
                             <div class="jobs_right">
                                 <div class="apply_now">
-                                    <a class="heart_mark" href="#"> <i class="fa fa-heart-o" aria-hidden="true"></i></a>
+                                    <a class="heart_mark" href="{{ route('getsavejob', $job->id) }}" 
+                                       class="toggle-save" 
+                                       data-job-id="{{ $job->id }}" 
+                                       data-saved="{{ $job->isSavedByUser(Auth::user()->id) ? 'true' : 'false' }}">
+                                       <i class="fa {{ $job->isSavedByUser(Auth::user()->id) ? 'fa-heart' : 'fa-heart-o' }}" aria-hidden="true"></i>
+                                    </a>
                                 </div>
                             </div>
+                            
                         </div>
                     </div>
                     <div class="descript_wrap white-bg">
@@ -108,6 +114,8 @@
                                 <li>Salary: <span>{{  $job->salary}}</span></li>
                                 <li>Location: <span>{{  $job->location}}</span></li>
                                 <li>Job Nature: <span> {{ $job->jobType->name }}</span></li>
+                                <li>Job Experience: <span> {{ $job->experience }}</span></li>
+
                             </ul>
                         </div>
                     </div>
@@ -131,3 +139,29 @@
     </div>
 </section>
 @endsection
+<script>$(document).on('click', '.toggle-save', function(e) {
+    e.preventDefault();
+    
+    var jobId = $(this).data('job-id');
+    
+    $.ajax({
+        url: $(this).attr('href'),
+        type: 'GET',
+        success: function(response) {
+            if (response.status) {
+                // Change heart icon based on response
+                var icon = response.message.includes('saved') ? 'fa-heart' : 'fa-heart-o';
+                $('.toggle-save[data-job-id="' + jobId + '"] i').removeClass('fa-heart-o fa-heart').addClass(icon);
+                
+                // Optionally, show a success message
+                alert(response.message);
+            } else {
+                alert(response.message);
+            }
+        },
+        error: function(xhr) {
+            alert('An error occurred. Please try again.');
+        }
+    });
+});
+</script>

@@ -89,6 +89,7 @@
                                 <li>Salary: <span>{{  $job->salary}}</span></li>
                                 <li>Location: <span>{{  $job->location}}</span></li>
                                 <li>Job Nature: <span> {{ $job->jobType->name }}</span></li>
+                                <li>Job Experience: <span> {{ $job->experience }}</span></li>
                             </ul>
                         </div>
                     </div>

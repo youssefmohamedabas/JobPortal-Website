@@ -17,4 +17,8 @@ class Job extends Model
     public function applications(){
         return $this->hasMany(jobapplication::class);
     }
+    public function isSavedByUser($userId) {
+        return Savejob::where('user_id', $userId)->where('job_id', $this->id)->exists();
+    }
+    
 }
