@@ -8,9 +8,11 @@
             </div>
             <div class="col-6 col-md-2">
                 <div class="align-end">
+                    <form action="{{ route('searchjob') }}" method="GET">
                     <select name="sort" id="sort" class="form-control">
-                        <option value="">Latest</option>
-                        <option value="">Oldest</option>
+                        <option value="">Select time</option>
+                        <option value="latest" {{ isset($req->sort) && $req->sort=='latest' ? 'selected' : '' }}>Latest</option>
+                        <option value="oldest" {{ isset($req->sort) && $req->sort=='oldest' ? 'selected' : '' }}>Oldest</option>
                     </select>
                 </div>
             </div>
@@ -19,7 +21,7 @@
         <div class="row pt-5">
             <div class="col-md-4 col-lg-3 sidebar mb-4">
                 <div class="card border-0 shadow p-4">
-                    <form action="{{ route('searchjob') }}" method="GET">
+                   
 
                     <div class="mb-4">
                         <h2>Keywords</h2>

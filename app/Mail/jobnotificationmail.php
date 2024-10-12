@@ -14,42 +14,33 @@ class jobnotificationmail extends Mailable
     use Queueable, SerializesModels;
 
     public $maildata;
-    /**
-     * Create a new message instance.
-     */
+
     public function __construct($maildata)
-    { $this->maildata=$maildata;
-        //
+    {
+        $this->maildata = $maildata; // Store the mail data
     }
 
-    /**
-     * Get the message envelope.
-     */
     public function envelope(): Envelope
     {
+        $jobTitle = isset($this->maildata['job']) && $this->maildata['job'] 
+            ? $this->maildata['job']->title 
+            : 'Unknown Job'; // Fallback if job is null
+
         return new Envelope(
-            subject: 'Job Notification: ' . $this->maildata['job']->title,  // You can customize the subject line with job details
+            subject:$jobTitle,
         );
     }
 
-    /**
-     * Get the message content definition.
-     */
     public function content(): Content
     {
         return new Content(
-            view: 'front.email.mail',  // Make sure this view file exists
+            view: 'front.email.mail', // Make sure this view file exists
             with: ['maildata' => $this->maildata],  // Pass data to the view
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
     public function attachments(): array
     {
-        return [];
+        return []; // Return an empty array for no attachments
     }
 }

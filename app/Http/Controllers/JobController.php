@@ -41,66 +41,77 @@ $job_types=JobType::orderBy('name','ASC')->where('status',1)->get();
 ]);
     }
 
-    public function savejob(Request $req){
-
-        $rules=[
-            'title'=>'required|min:5|max:200',
-            'category'=>'required', 
-            'location'=>'required|max:50', 
-            'jobtype'=>'required',
-             'vacancy'=>'required|integer',
-             'description'=>'required',
-             'experience'=>'required',
-             'company_name'=>'required|min:3|max:70',
-             'keywords'=>'required',
-             
+    public function savejob(Request $req) {
+        $rules = [
+            'title' => 'required|min:5|max:200',
+            'category' => 'required', 
+            'location' => 'required|max:50', 
+            'jobtype' => 'required',
+            'vacancy' => 'required|integer',
+            'description' => 'required',
+            'experience' => 'required',
+            'company_name' => 'required|min:3|max:70',
+            'keywords' => 'required',
         ];
-$validator=Validator::make($req->all(),$rules);
-$id=Auth::user()->id;        
-if($validator->passes()){
-$job=new Job();
-    $job->title=$req->title;
-    $job->category_id=$req->category;
-    $job->user_id=$id;
-
-    $job->location=$req->location;
-
-    $job->job_type_id=$req->jobtype;
-
-    $job->description=$req->description;
-    $job->salary=$req->salary;
-    $job->responsibility=$req->responsibility;
-    $job->qualifications=$req->qualifications;
-    $job->benefits=$req->benefits;
-
-    $job->vacancy=$req->vacancy;
-
     
-    $job->experience=$req->experience;
-    $job->company_name=$req->company_name;
-    $job->company_location=$req->company_location;
-    $job->company_website=$req->company_website;
-    $job->keywords=$req->keywords;
-$job->save();
-$user=User::where('id',$id)->first();
-$jobnoty=Job::where('id',$id)->with(['categoryType','jobType'])->first();
-$maildata=[
-    'user'=>$user,
-    'job'=>$jobnoty
-];
-Mail::to($user->email)->send(new jobnotificationmail($maildata));
-session()->flash('success','Job created Successfully');
-return response()->json([
-    'status'=>true,
-    'errors'=>[]
-   ]);
-}else{
-   return response()->json([
-    'status'=>false,
-    'errors'=>$validator->errors()
-   ]);
-}
+        $validator = Validator::make($req->all(), $rules);
+        $id = Auth::user()->id;        
+    
+        if ($validator->passes()) {
+            $job = new Job();
+            $job->title = $req->title;
+            $job->category_id = $req->category;
+            $job->user_id = $id;
+            $job->location = $req->location;
+            $job->job_type_id = $req->jobtype;
+            $job->description = $req->description;
+            $job->salary = $req->salary;
+            $job->responsibility = $req->responsibility;
+            $job->qualifications = $req->qualifications;
+            $job->benefits = $req->benefits;
+            $job->vacancy = $req->vacancy;
+            $job->experience = $req->experience;
+            $job->company_name = $req->company_name;
+            $job->company_location = $req->company_location;
+            $job->company_website = $req->company_website;
+            $job->keywords = $req->keywords;
+            
+            $job->save();
+    
+            // Fetch the user
+            $user = User::find($id);
+            
+            // Fetch the newly created job using its ID
+            $jobnoty = Job::with(['categoryType', 'jobType'])->find($job->id); // Change here
+    
+            // Ensure the job exists before sending the email
+            if ($jobnoty) {
+                $maildata = [
+                    'user' => $user,
+                    'job' => $jobnoty
+                ];
+                Mail::to($user->email)->send(new jobnotificationmail($maildata));
+            } else {
+                // Handle the case where the job couldn't be found
+                return response()->json([
+                    'status' => false,
+                    'errors' => ['job' => 'Job not found.']
+                ]);
+            }
+    
+            session()->flash('success', 'Job created Successfully');
+            return response()->json([
+                'status' => true,
+                'errors' => []
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'errors' => $validator->errors()
+            ]);
+        }
     }
+    
     public function showjob(){
 $id=Auth::user()->id;
 $jobs=Job::where('user_id',$id)->with('jobType')->paginate(10);
@@ -323,7 +334,14 @@ public function removesavejob(Request $req){
             $query->where('experience', '=', $req->experience);
         }
     }
-
+if ($req->has('sort')&&!empty($req->sort)){
+    if($req->sort=='latest'){
+        $query->orderBy('created_at','DESC');
+    }
+    elseif($req->sort=='oldest'){
+        $query->orderBy('created_at','ASC');
+    }
+}
     // Execute the query and get the results
     $jobs = $query->with('jobType')->get();
     $categories = Category::where('status', 1)->get();
